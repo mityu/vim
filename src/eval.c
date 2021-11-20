@@ -2314,16 +2314,16 @@ eval1(char_u **arg, typval_T *rettv, evalarg_T *evalarg)
 	evaluate = evalarg_used->eval_flags & EVAL_EVALUATE;
 
 	if (getnext)
-	    *arg = eval_next_line(evalarg_used);
+	    p = eval_next_line(evalarg_used);
 	else
 	{
 	    if (evaluate && vim9script && !VIM_ISWHITE(p[-1]))
 	    {
 		error_white_both(p, op_falsy ? 2 : 1);
 		clear_tv(rettv);
+		*arg = p;
 		return FAIL;
 	    }
-	    *arg = p;
 	}
 
 	result = FALSE;
@@ -2340,26 +2340,31 @@ eval1(char_u **arg, typval_T *rettv, evalarg_T *evalarg)
 	    if (error || !op_falsy || !result)
 		clear_tv(rettv);
 	    if (error)
+	    {
+		*arg = p;
 		return FAIL;
+	    }
 	}
 
 	/*
 	 * Get the second variable.  Recursive!
 	 */
 	if (op_falsy)
-	    ++*arg;
-	if (evaluate && vim9script && !IS_WHITE_OR_NUL((*arg)[1]))
+	    ++p;
+	if (evaluate && vim9script && !IS_WHITE_OR_NUL(p[1]))
 	{
-	    error_white_both(*arg - (op_falsy ? 1 : 0), op_falsy ? 2 : 1);
+	    error_white_both(p - (op_falsy ? 1 : 0), op_falsy ? 2 : 1);
 	    clear_tv(rettv);
+	    *arg = p;
 	    return FAIL;
 	}
-	*arg = skipwhite_and_linebreak(*arg + 1, evalarg_used);
+	p = skipwhite_and_linebreak(p + 1, evalarg_used);
 	evalarg_used->eval_flags = (op_falsy ? !result : result)
 				    ? orig_flags : orig_flags & ~EVAL_EVALUATE;
-	if (eval1(arg, &var2, evalarg_used) == FAIL)
+	if (eval1(&p, &var2, evalarg_used) == FAIL)
 	{
 	    evalarg_used->eval_flags = orig_flags;
+	    *arg = p;
 	    return FAIL;
 	}
 	if (!op_falsy || !result)
@@ -2370,17 +2375,18 @@ eval1(char_u **arg, typval_T *rettv, evalarg_T *evalarg)
 	    /*
 	     * Check for the ":".
 	     */
-	    p = eval_next_non_blank(*arg, evalarg_used, &getnext);
+	    p = eval_next_non_blank(p, evalarg_used, &getnext);
 	    if (*p != ':')
 	    {
 		emsg(_(e_missing_colon));
 		if (evaluate && result)
 		    clear_tv(rettv);
 		evalarg_used->eval_flags = orig_flags;
+		*arg = p;
 		return FAIL;
 	    }
 	    if (getnext)
-		*arg = eval_next_line(evalarg_used);
+		p = eval_next_line(evalarg_used);
 	    else
 	    {
 		if (evaluate && vim9script && !VIM_ISWHITE(p[-1]))
@@ -2388,29 +2394,31 @@ eval1(char_u **arg, typval_T *rettv, evalarg_T *evalarg)
 		    error_white_both(p, 1);
 		    clear_tv(rettv);
 		    evalarg_used->eval_flags = orig_flags;
+		    *arg = p;
 		    return FAIL;
 		}
-		*arg = p;
 	    }
 
 	    /*
 	     * Get the third variable.  Recursive!
 	     */
-	    if (evaluate && vim9script && !IS_WHITE_OR_NUL((*arg)[1]))
+	    if (evaluate && vim9script && !IS_WHITE_OR_NUL(p[1]))
 	    {
-		error_white_both(*arg, 1);
+		error_white_both(p, 1);
 		clear_tv(rettv);
 		evalarg_used->eval_flags = orig_flags;
+		*arg = p;
 		return FAIL;
 	    }
-	    *arg = skipwhite_and_linebreak(*arg + 1, evalarg_used);
+	    p = skipwhite_and_linebreak(p + 1, evalarg_used);
 	    evalarg_used->eval_flags = !result ? orig_flags
 						 : orig_flags & ~EVAL_EVALUATE;
-	    if (eval1(arg, &var2, evalarg_used) == FAIL)
+	    if (eval1(&p, &var2, evalarg_used) == FAIL)
 	    {
 		if (evaluate && result)
 		    clear_tv(rettv);
 		evalarg_used->eval_flags = orig_flags;
+		*arg = p;
 		return FAIL;
 	    }
 	    if (evaluate && !result)
@@ -2423,6 +2431,7 @@ eval1(char_u **arg, typval_T *rettv, evalarg_T *evalarg)
 	    evalarg->eval_flags = orig_flags;
     }
 
+    *arg = p;
     return OK;
 }
 
