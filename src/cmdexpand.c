@@ -334,7 +334,9 @@ cmdline_pum_create(
     }
 
     // Compute the popup menu starting column
-    compl_startcol = vim_strsize(ccline->cmdbuff) + 1;
+    compl_startcol = vim_strsize(ccline->cmdbuff) +
+	(ccline->cmdfirstc <= 0 ? 0 : 1) +
+	(ccline->cmdprompt == NULL ? 0 : vim_strsize(ccline->cmdprompt));
     columns = vim_strsize(xp->xp_pattern);
     if (showtail)
     {

@@ -2380,6 +2380,25 @@ func Test_wildmenu_pum_from_terminal()
   call delete('Xtest')
 endfunc
 
+" Test popup menu should be positioned correctly for completion of input()
+" with long prompt.
+func Test_wildmenu_pum_with_input_completion()
+  CheckRunVimInTerminal
+  let lines =<< trim END
+    set wildoptions=pum
+    set shortmess+=I
+    function Complete(...)
+      return "aaa\nbbb\nccc"
+    endfunction
+  END
+  call writefile(lines, 'Xtest_pum_input')
+  let buf = RunVimInTerminal('-S Xtest_pum_input', {'rows': 8})
+  call term_sendkeys(buf, ":call input('loooooooong-prompt', '', 'custom,Complete')\<CR>\<Tab>")
+  call VerifyScreenDump(buf, 'Test_wildmenu_with_input_completion1', {})
+  " TODO: Test popup will be cleared (Not work properly now.)
+  StopVimInTerminal(buf)
+  call delete('Xtest_pum_input')
+endfunc
 " Test for completion after a :substitute command followed by a pipe (|)
 " character
 func Test_cmdline_complete_substitute()
