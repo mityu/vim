@@ -2396,6 +2396,7 @@ func Test_wildmenu_pum_with_input_completion()
   call term_sendkeys(buf, ":call input('loooooooong-prompt', '', 'custom,Complete')\<CR>\<Tab>")
   call VerifyScreenDump(buf, 'Test_wildmenu_with_input_completion1', {})
   " TODO: Test popup will be cleared (Not work properly now.)
+  call term_sendkeys(buf, "\<ESC>")
   call StopVimInTerminal(buf)
   call delete('Xtest_pum_input')
 endfunc
