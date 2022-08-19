@@ -143,7 +143,12 @@ update_screen(int type_arg)
 
     // Postpone the redrawing when it's not needed and when being called
     // recursively.
-    if (!(redrawing() || getting_user_input) || updating_screen)
+    if (!(redrawing()
+#ifdef FEAT_EVAL
+		|| getting_user_input
+#endif
+		)
+	    || updating_screen)
     {
 	redraw_later(type);		// remember type for next time
 	must_redraw = type;
