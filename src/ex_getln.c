@@ -4849,7 +4849,7 @@ get_user_input(
 	    ex_normal_busy = save_ex_normal_busy;
 	    vgetc_busy = save_vgetc_busy;
 	    input_busy = save_input_busy;
-	    getting_user_input = FALSE;
+	    getting_user_input = save_getting_user_input;
 	}
 	if (inputdialog && rettv->vval.v_string == NULL
 		&& argvars[1].v_type != VAR_UNKNOWN
