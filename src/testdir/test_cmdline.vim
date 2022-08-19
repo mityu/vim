@@ -2395,17 +2395,20 @@ func Test_wildmenu_pum_with_input_completion()
   let buf = RunVimInTerminal('-S Xtest_pum_input', {'rows': 8})
 
   call term_sendkeys(buf,
-        \ ":call input('loooooooong-prompt', '', 'custom,Complete')\<CR>\<Tab>")
+        \ ":call input('loooooooong-prompt>', '', 'custom,Complete')\<CR>\<Tab>")
   call VerifyScreenDump(buf, 'Test_wildmenu_with_input_completion1', {})
 
   call term_sendkeys(buf, "\<C-h>")
   call VerifyScreenDump(buf, 'Test_wildmenu_with_input_completion2', {})
 
-  call term_sendkeys(buf, "\<C-u>\<Tab>\<C-e>")
+  call term_sendkeys(buf, "\<C-u>\<Tab>")
   call VerifyScreenDump(buf, 'Test_wildmenu_with_input_completion3', {})
 
-  call term_sendkeys(buf, "\<C-u>\<Tab>\<C-y>")
+  call term_sendkeys(buf, "\<C-e>")
   call VerifyScreenDump(buf, 'Test_wildmenu_with_input_completion4', {})
+
+  call term_sendkeys(buf, "\<C-u>\<Tab>\<C-y>")
+  call VerifyScreenDump(buf, 'Test_wildmenu_with_input_completion5', {})
 
   " Clean up
   call term_sendkeys(buf, "\<ESC>")

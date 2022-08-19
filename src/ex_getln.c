@@ -4837,16 +4837,19 @@ get_user_input(
 	    int save_ex_normal_busy = ex_normal_busy;
 	    int save_vgetc_busy = vgetc_busy;
 	    int save_input_busy = input_busy;
+	    int save_getting_user_input = getting_user_input;
 
 	    input_busy |= vgetc_busy;
 	    ex_normal_busy = 0;
 	    vgetc_busy = 0;
+	    getting_user_input = TRUE;
 	    rettv->vval.v_string =
 		getcmdline_prompt(secret ? NUL : '@', p, get_echo_attr(),
 							      xp_type, xp_arg);
 	    ex_normal_busy = save_ex_normal_busy;
 	    vgetc_busy = save_vgetc_busy;
 	    input_busy = save_input_busy;
+	    getting_user_input = FALSE;
 	}
 	if (inputdialog && rettv->vval.v_string == NULL
 		&& argvars[1].v_type != VAR_UNKNOWN

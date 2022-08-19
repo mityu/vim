@@ -1656,7 +1656,8 @@ EXTERN int  did_add_timer INIT(= FALSE);
 EXTERN int  timer_busy INIT(= 0);   // when timer is inside vgetc() then > 0
 #endif
 #ifdef FEAT_EVAL
-EXTERN int  input_busy INIT(= 0);   // when inside get_user_input() then > 0
+EXTERN int  input_busy INIT(= 0);   // when inside get_user_input() then >= vgetc_busy
+EXTERN int  getting_user_input INIT(= FALSE); // when inside get_user_input() then TRUE
 
 EXTERN typval_T	*lval_root INIT(= NULL);
 #endif
