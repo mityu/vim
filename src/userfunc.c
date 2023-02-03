@@ -506,7 +506,7 @@ parse_argument_types(ufunc_T *fp, garray_T *argtypes, int varargs)
 		    type = &t_unknown;
 		else
 		    type = parse_type(&p, &fp->uf_type_list, TRUE);
-		if (type == NULL)
+		if (type == NULL || !valid_declaration_type(type, TRUE))
 		    return FAIL;
 		fp->uf_arg_types[i] = type;
 		if (i < fp->uf_args.ga_len
@@ -535,12 +535,18 @@ parse_argument_types(ufunc_T *fp, garray_T *argtypes, int varargs)
 	else
 	{
 	    fp->uf_va_type = parse_type(&p, &fp->uf_type_list, TRUE);
-	    if (fp->uf_va_type != NULL && fp->uf_va_type->tt_type != VAR_LIST)
+	    if (fp->uf_va_type == NULL)
+		return FAIL;
+	    else if (fp->uf_va_type->tt_type != VAR_LIST)
 	    {
 		semsg(_(e_variable_arguments_type_must_be_list_str),
 					  ((char_u **)argtypes->ga_data)[len]);
 		return FAIL;
 	    }
+	    else if (!valid_declaration_type(fp->uf_va_type, TRUE))
+		// TODO: Give FALSE to give_error above.
+		// TODO: Show original message
+		return FAIL;
 	}
 	if (fp->uf_va_type == NULL)
 	    return FAIL;
@@ -564,6 +570,9 @@ parse_return_type(ufunc_T *fp, char_u *ret_type)
 	    fp->uf_ret_type = &t_void;
 	    return FAIL;
 	}
+	else if (fp->uf_ret_type->tt_type != VAR_VOID
+		&& !valid_declaration_type(fp->uf_ret_type, TRUE))
+	    return FAIL;
     }
     return OK;
 }
@@ -1631,6 +1640,9 @@ get_lambda_tv(
 		fp->uf_ret_type = parse_type(&ret_type,
 						      &fp->uf_type_list, TRUE);
 		if (fp->uf_ret_type == NULL)
+		    goto errret;
+		else if (fp->uf_ret_type->tt_type != VAR_VOID
+			&& !valid_declaration_type(fp->uf_ret_type, TRUE))
 		    goto errret;
 	    }
 	    else

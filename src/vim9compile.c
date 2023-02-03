@@ -1758,7 +1758,8 @@ compile_lhs(
 	    }
 	    p = skipwhite(var_end + 1);
 	    lhs->lhs_type = parse_type(&p, cctx->ctx_type_list, TRUE);
-	    if (lhs->lhs_type == NULL)
+	    if (lhs->lhs_type == NULL ||
+		    !valid_declaration_type(lhs->lhs_type, TRUE))
 		return FAIL;
 	    lhs->lhs_has_type = TRUE;
 	    lhs->lhs_end = p;

@@ -260,8 +260,7 @@ get_list_type(type_T *member_type, garray_T *type_gap)
     // recognize commonly used types
     if (member_type == NULL || member_type->tt_type == VAR_ANY)
 	return &t_list_any;
-    if (member_type->tt_type == VAR_VOID
-	    || member_type->tt_type == VAR_UNKNOWN)
+    if (member_type->tt_type == VAR_UNKNOWN)
 	return &t_list_empty;
     if (member_type->tt_type == VAR_BOOL)
 	return &t_list_bool;
@@ -289,8 +288,7 @@ get_dict_type(type_T *member_type, garray_T *type_gap)
     // recognize commonly used types
     if (member_type == NULL || member_type->tt_type == VAR_ANY)
 	return &t_dict_any;
-    if (member_type->tt_type == VAR_VOID
-	    || member_type->tt_type == VAR_UNKNOWN)
+    if (member_type->tt_type == VAR_UNKNOWN)
 	return &t_dict_empty;
     if (member_type->tt_type == VAR_BOOL)
 	return &t_dict_bool;
@@ -647,15 +645,22 @@ typval2type(typval_T *tv, int copyID, garray_T *type_gap, int flags)
  * Give an error and return FALSE if not.
  */
     int
-valid_declaration_type(type_T *type)
+valid_declaration_type(type_T *type, int give_error)
 {
+    type_T	*orig_type = type;
+    while (type->tt_type == VAR_LIST || type->tt_type == VAR_DICT)
+	type = type->tt_member;
     if (type->tt_type == VAR_SPECIAL  // null, none
 	    || type->tt_type == VAR_VOID)
     {
-	char *tofree = NULL;
-	char *name = type_name(type, &tofree);
-	semsg(_(e_invalid_type_for_object_member_str), name);
-	vim_free(tofree);
+	if (give_error)
+	{
+	    char *tofree = NULL;
+	    char *name = type_name(orig_type, &tofree);
+	    semsg(_(e_type_not_allowed_here_str_str),
+		    type->tt_type == VAR_SPECIAL ? "special" : "void", name);
+	    vim_free(tofree);
+	}
 	return FALSE;
     }
     return TRUE;
@@ -1078,6 +1083,9 @@ parse_type_member(
     *arg = skipwhite(*arg + 1);
 
     member_type = parse_type(arg, type_gap, give_error);
+    // TODO: Type check needed?
+    // if (member_type == NULL
+	   //  || !valid_declaration_type(member_type, give_error))
     if (member_type == NULL)
 	return NULL;
 
@@ -1193,7 +1201,8 @@ parse_type(char_u **arg, garray_T *type_gap, int give_error)
 			}
 
 			type = parse_type(&p, type_gap, give_error);
-			if (type == NULL)
+			if (type == NULL ||
+				!valid_declaration_type(type, give_error))
 			    return NULL;
 			arg_type[argcount++] = type;
 
@@ -1246,7 +1255,9 @@ parse_type(char_u **arg, garray_T *type_gap, int give_error)
 								":", *arg - 1);
 		    *arg = skipwhite(*arg);
 		    ret_type = parse_type(arg, type_gap, give_error);
-		    if (ret_type == NULL)
+		    if (ret_type == NULL ||
+			!(ret_type->tt_type == VAR_VOID
+			    || valid_declaration_type(ret_type, give_error)))
 			return NULL;
 		}
 		if (flags == 0 && first_optional == -1 && argcount <= 0)

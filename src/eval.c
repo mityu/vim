@@ -1122,7 +1122,9 @@ get_lval(
 		lp->ll_type = parse_type(&tp,
 			       &SCRIPT_ITEM(current_sctx.sc_sid)->sn_type_list,
 			       !quiet);
-		if (lp->ll_type == NULL && !quiet)
+		if ((lp->ll_type == NULL||
+			    !valid_declaration_type(lp->ll_type, !quiet))
+			&& !quiet)
 		    return NULL;
 		lp->ll_name_end = tp;
 	    }

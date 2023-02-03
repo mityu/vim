@@ -114,7 +114,7 @@ parse_member(
 	}
 	clear_evalarg(&evalarg, NULL);
     }
-    if (!valid_declaration_type(type))
+    if (!valid_declaration_type(type, TRUE))
 	return FAIL;
 
     *type_ret = type;

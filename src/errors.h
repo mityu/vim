@@ -3376,8 +3376,8 @@ EXTERN char e_constructor_default_value_must_be_vnone_str[]
 	INIT(= N_("E1328: Constructor default value must be v:none: %s"));
 EXTERN char e_cannot_get_object_member_type_from_initializer_str[]
 	INIT(= N_("E1329: Cannot get object member type from initializer: %s"));
-EXTERN char e_invalid_type_for_object_member_str[]
-	INIT(= N_("E1330: Invalid type for object member: %s"));
+EXTERN char e_type_not_allowed_here_str_str[]
+	INIT(= N_("E1330: Type \"%s\" is not allowed here: %s"));
 EXTERN char e_public_must_be_followed_by_this_or_static[]
 	INIT(= N_("E1331: Public must be followed by \"this\" or \"static\""));
 EXTERN char e_public_member_name_cannot_start_with_underscore_str[]

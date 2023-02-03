@@ -266,6 +266,51 @@ def Test_script_wrong_type()
   v9.CheckScriptFailure(lines, 'E1012: Type mismatch; expected string but got list<string>', 3)
 enddef
 
+def Test_declare_void_related_type()
+  var lines: list<string>
+
+  lines =<< trim END
+    var v: void
+  END
+  v9.CheckDefAndScriptFailure(lines, 'E1330', 1)
+
+  lines =<< trim END
+    var v: list<void>
+  END
+  v9.CheckDefAndScriptFailure(lines, 'E1330', 1)
+
+  lines =<< trim END
+    var v: dict<void>
+  END
+  v9.CheckDefAndScriptFailure(lines, 'E1330', 1)
+
+  lines =<< trim END
+    def F(): list<dict<void>>
+    enddef
+  END
+  v9.CheckDefAndScriptFailure(lines, 'E1330', 1)
+
+  lines =<< trim END
+    var F = (): dict<list<void>> => null_dict
+  END
+  v9.CheckDefAndScriptFailure(lines, 'E1330', 1)
+
+  lines =<< trim END
+    var F: func(): list<dict<void>>
+  END
+  v9.CheckDefAndScriptFailure(lines, 'E1330', 1)
+
+  lines =<< trim END
+    var F: func(void)
+  END
+  v9.CheckDefAndScriptFailure(lines, 'E1330', 1)
+
+  lines =<< trim END
+    var F: func(list<dict<void>>)
+  END
+  v9.CheckDefAndScriptFailure(lines, 'E1330', 1)
+enddef
+
 def Test_const()
   v9.CheckDefFailure(['final name = 234', 'name = 99'], 'E1018:')
   v9.CheckDefFailure(['final one = 234', 'var one = 99'], 'E1017:')
