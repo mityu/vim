@@ -1083,9 +1083,8 @@ parse_type_member(
     *arg = skipwhite(*arg + 1);
 
     member_type = parse_type(arg, type_gap, give_error);
-    // TODO: Type check needed?
-    // if (member_type == NULL
-	   //  || !valid_declaration_type(member_type, give_error))
+    // No need to do type check here.  It's done in the parse_type() call
+    // above.
     if (member_type == NULL)
 	return NULL;
 
